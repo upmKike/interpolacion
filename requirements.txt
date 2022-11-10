@@ -3,6 +3,5 @@ sympy
 scipy
 matplotlib
 numpy
-math
 typing
 shapely
