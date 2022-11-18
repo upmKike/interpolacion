@@ -6,8 +6,8 @@ from scipy.interpolate import CubicSpline, interp1d
 
 # ESTA CELDA ES LA GENERACION DE LOS DATOS DE ENTRADA PARA USAR LAS DIFERENTES FUNCIONES DE INTERPOLACION
 
-#def f(x):
-#    return np.exp(-2*x) * np.sin(10*np.pi*x)
+# def f(x):
+#     return np.exp(-2*x) * np.sin(10*np.pi*x)
 
 #lista_puntos = [] # funcion
 #for i in np.linspace(0, 1, 90):
@@ -33,7 +33,7 @@ def formula_lagrange(x: float, x0: float, y0: float, x1: float, y1: float) -> Tu
     '''
     return x, (x - x1) * y0 / (x0 - x1) + (x - x0) * y1 / (x1 - x0)
 
-def formula_lagrange_directa(x: float, lista_pred: List[float]) -> Tuple[float, float]:
+def formula_lagrange_directa(x: float, lista_pred: List[float], f) -> Tuple[float, float]:
     '''
     FORMULA DE NEWTON-LAGRANGE (verifica si el valor a interpolar esta dentro de los intervalos)\n
     x = valor a interpolar,\n 
@@ -57,7 +57,7 @@ def formula_newton(x: float, x0: float, y0: float, x1: float, y1: float) -> Tupl
     c0 = y0
     return x, c0 + c1 * (x - x0)
 
-def formula_newton_directa(x: float, lista_pred: List[float]) -> Tuple[float, float]:
+def formula_newton_directa(x: float, lista_pred: List[float], f) -> Tuple[float, float]:
     '''
     FORMULA DE NEWTON DIRECTA (verifica si el valor a interpolar esta dentro de los intervalos)\n
     x = valor a interpolar,\n 
@@ -110,7 +110,7 @@ def plot_interpolacion(lista_pred: List[float] = [], punto_pred: List[float]|Lis
         plt.vlines(pos[0], 0, pos[1], linestyles='dashed', color = 'orange')
         
     # Linea horizontal en 0
-    plt.hlines(0, lista_pos[0], lista_pos[-1], colors='black')
+    plt.hlines(0, lista_pred[0][0], lista_pred[-1][0], colors='black')
     
     # Grid
     plt.grid()
@@ -122,14 +122,14 @@ def plot_interpolacion(lista_pred: List[float] = [], punto_pred: List[float]|Lis
 # plot_interpolacion(lista_pred, punto_pred_lagrange_directa, lista_puntos)
 
 
-def interpolacion_one_time(x, lista_pos_x: List[float] = None, lista_pos_y: List[float] = None, tipo = 'linear', lista_pred: List[tuple] = None) -> List[float]:
+def interpolacion_one_time(x, lista_pos_x: List[float] = None, lista_pos_y: List[float] = None, tipo = 'slinear', lista_pred: List[tuple] = None) -> List[float]:
     '''
     INTERPOLACION DE UNA SOLA VEZ\n
     Args:
         * :param x = valor a interpolar\n
         * :param lista_pos_x = lista de posiciones en x\n
         * :param lista_pos_y = lista de posiciones en y\n
-        * :param tipo = tipo de interpolacion\n
+        * :param tipo = tipo de interpolacion ( "slinear", "quadratic", "cubic" )\n
         * :param lista_puntos = lista de puntos de la funcion\n
         
     Returns:
@@ -137,17 +137,17 @@ def interpolacion_one_time(x, lista_pos_x: List[float] = None, lista_pos_y: List
     '''
     if tipo != "cubic":
     
-        if lista_puntos:
-            lista_pos_x = [i[0] for i in lista_puntos]
-            lista_pos_y = [i[1] for i in lista_puntos]
+        if lista_pred:
+            lista_pos_x = [i[0] for i in lista_pred]
+            lista_pos_y = [i[1] for i in lista_pred]
             return [x, interp1d(lista_pos_x, lista_pos_y, kind = tipo)(x)]
         
         return [x, interp1d(lista_pos_x, lista_pos_y, kind = tipo)(x)]
     
     else:
-        if lista_puntos:
-            lista_pos_x = [i[0] for i in lista_puntos]
-            lista_pos_y = [i[1] for i in lista_puntos]
+        if lista_pred:
+            lista_pos_x = [i[0] for i in lista_pred]
+            lista_pos_y = [i[1] for i in lista_pred]
             funcion_cubic = CubicSpline(lista_pos_x, lista_pos_y, bc_type='natural')
             return [x, funcion_cubic(x)]
         
@@ -180,8 +180,8 @@ def general_interpolacion_select(lista_pos_x: List[float] = [], lista_pos_y: Lis
             x_lins = np.linspace(lista_pos_x[0], lista_pos_x[-1], 1000)
             return [x_lins, interp1d(lista_pos_x, lista_pos_y, kind = tipo)(x_lins)]
         
-        lista_pos_x = [i[0] for i in lista_puntos]
-        lista_pos_y = [i[1] for i in lista_puntos]
+        lista_pos_x = [i[0] for i in lista_pred]
+        lista_pos_y = [i[1] for i in lista_pred]
         
         x_lins = np.linspace(lista_pos_x[0], lista_pos_x[-1], 1000)
         return [x_lins, interp1d(lista_pos_x, lista_pos_y, kind = tipo)(x_lins)]
@@ -194,8 +194,8 @@ def general_interpolacion_select(lista_pos_x: List[float] = [], lista_pos_y: Lis
             funcion_cubic = CubicSpline(lista_pos_x, lista_pos_y, bc_type="natural")
             return [x_lins, funcion_cubic(x_lins)]
         
-        lista_pos_x = [i[0] for i in lista_puntos]
-        lista_pos_y = [i[1] for i in lista_puntos]
+        lista_pos_x = [i[0] for i in lista_pred]
+        lista_pos_y = [i[1] for i in lista_pred]
         
         x_lins = np.linspace(lista_pos_x[0], lista_pos_x[-1], 1000)
         funcion_cubic = CubicSpline(lista_pos_x, lista_pos_y, bc_type="natural")
@@ -212,7 +212,7 @@ def general_interpolacion_select(lista_pos_x: List[float] = [], lista_pos_y: Lis
 #plot_interpolacion(lista_pred, interpolacion_pred) # lista_puntos = lista_puntos (opcional para visualizar la funcion original)
 
 
-def interpolate_and_plot(lista_pos_x: List[float] = None, lista_pos_y: List[float] = None, lista_pred: List[Tuple] = None, tipo: str = 'linear') -> List[float]:
+def interpolate_and_plot(lista_pos_x: List[float] = None, lista_pos_y: List[float] = None, lista_pred: List[Tuple] = None, tipo: str = 'slinear') -> List[float]:
     '''
     CALCULO DE LA INTERPOLACION + PLOT\n
     Calcula la interpolacion en los itervalos dados y los plotea.
