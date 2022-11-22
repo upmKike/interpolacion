@@ -80,7 +80,7 @@ def formula_newton_directa(x: float, lista_pred: List[float], f) -> Tuple[float,
 # PODEMOS VER QUE LA DIFERENCIA ENTRE LOS DOS METODOS ES NULA; SU RESULTADO ES EL MISMO.
 
 
-def plot_interpolacion(lista_pred: List[float] = [], punto_pred: List[float]|List[Tuple] = [], lista_puntos: List[float] = None) -> None:
+def plot_interpolacion(lista_pred: List[float] = [], punto_pred: List[float] = [], lista_puntos: List[float] = None) -> None:
     '''
     PLOT DE LA INTERPOLACION\n
     Plotea la funcion y los puntos a interpolar junto con los puntos interpolados
